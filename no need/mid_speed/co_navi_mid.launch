@@ -1,0 +1,20 @@
+  <launch>
+    <arg name="map_size_x" value="300.0"/>
+    <arg name="map_size_y" value="300.0"/>
+    <arg name="map_size_z" value="10.0"/>
+
+    <!-- Launch Rviz node -->
+    <include file="$(find ego_planner)/launch/rviz.launch"/>
+    <include file="$(find co_navi_pkg)/launch/mid_speed/map_drones_generator.launch">
+        <arg name="map_size_x" value="$(arg map_size_x)"/>
+        <arg name="map_size_y" value="$(arg map_size_y)"/>
+        <arg name="map_size_z" value="$(arg map_size_z)"/>
+    </include>
+
+    <include file="$(find co_navi_pkg)/launch/mid_speed/drones.launch">
+        <arg name="map_size_x" value="$(arg map_size_x)"/>
+        <arg name="map_size_y" value="$(arg map_size_y)"/>
+        <arg name="map_size_z" value="$(arg map_size_z)"/>
+    </include>
+    <!-- <include file="$(find co_navi_pkg)/launch/methods/dist_co_navi/dist_co_navi.launch"/> -->
+  </launch>

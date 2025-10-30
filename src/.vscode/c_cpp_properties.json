@@ -1,0 +1,36 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/planner/bspline_opt/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/VINS-Fusion/camera_models/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/co_navi_pkg/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/planner/drone_detect/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/planner/plan_manage/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/uav_simulator/mockamap/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/uav_simulator/Utils/multi_map_server/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/planner/path_searching/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/planner/plan_env/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/uav_simulator/Utils/pose_utils/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/uav_simulator/Utils/quadrotor_msgs/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/uav_simulator/so3_control/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/uav_simulator/so3_quadrotor_simulator/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/planner/traj_utils/include/**",
+        "/home/adminn/ros_ws/Fast_Lab/ego-planner-swarm/src/uav_simulator/Utils/uav_utils/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

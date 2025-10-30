@@ -1,0 +1,112 @@
+CompileFlags:
+  # 添加编译标志
+  Add: 
+    # C++ 标准
+    - -std=c++17
+    
+    # ROS 相关包含路径
+    - -I/opt/ros/noetic/include
+    - -I/opt/ros/noetic/include/ros
+    - -I/opt/ros/noetic/include/std_msgs
+    - -I/opt/ros/noetic/include/geometry_msgs
+    - -I/opt/ros/noetic/include/nav_msgs
+    - -I/opt/ros/noetic/include/sensor_msgs
+    - -I/opt/ros/noetic/include/traj_utils
+    - -I/opt/ros/noetic/include/quadrotor_msgs
+    
+    # Eigen 库
+    - -I/usr/include/eigen3
+    
+    # PCL 点云库
+    - -I/usr/include/pcl-1.10
+    - -I/usr/include/pcl-1.10/pcl
+    
+    # VTK 库
+    - -I/usr/include/vtk-7.1
+    
+    # 项目特定包含路径
+    - -I${workspaceFolder}/src/co_navi_pkg/include
+    - -I${workspaceFolder}/src/planner/plan_manage/include
+    - -I${workspaceFolder}/src/planner/bspline_opt/include
+    - -I${workspaceFolder}/src/planner/path_searching/include
+    - -I${workspaceFolder}/src/planner/plan_env/include
+    - -I${workspaceFolder}/src/planner/traj_utils/include
+    - -I${workspaceFolder}/src/uav_simulator/Utils/pose_utils/include
+    - -I${workspaceFolder}/src/uav_simulator/Utils/quadrotor_msgs/include
+    
+    # 系统库
+    - -I/usr/include
+    - -I/usr/local/include
+    
+    # 编译选项
+    - -Wall
+    - -Wextra
+    - -O2
+    - -g
+    
+    # 预处理器定义
+    - -DROS_BUILD_SHARED_LIBS=1
+    - -D__STDC_CONSTANT_MACROS
+    - -D__STDC_FORMAT_MACROS
+    - -D__STDC_LIMIT_MACROS
+
+# 诊断设置
+Diagnostics:
+  # 忽略某些警告
+  Suppress:
+    - modernize-use-nullptr
+    - google-explicit-constructor
+    - google-readability-namespace-comments
+    - google-runtime-references
+    - llvmlibc-callee-namespace
+    - llvmlibc-implementation-in-namespace
+    - llvmlibc-restrict-system-libc-headers
+
+# 索引设置
+Index:
+  # 包含的文件类型
+  Include:
+    - "**/*.h"
+    - "**/*.hpp"
+    - "**/*.cpp"
+    - "**/*.cc"
+    - "**/*.c"
+  
+  # 排除的文件和目录
+  Exclude:
+    - "**/build/**"
+    - "**/devel/**"
+    - "**/install/**"
+    - "**/.git/**"
+    - "**/CMakeFiles/**"
+    - "**/*.o"
+    - "**/*.a"
+    - "**/*.so"
+
+# 代码补全设置
+Completion:
+  # 启用代码补全
+  Enable: true
+  
+  # 补全优先级
+  Priority: 1
+
+# 格式化设置
+Format:
+  # 使用 clang-format
+  BasedOnStyle: Google
+  
+  # 缩进设置
+  IndentWidth: 2
+  TabWidth: 2
+  UseTab: Never
+  
+  # 行长度
+  ColumnLimit: 120
+  
+  # 其他格式设置
+  AllowShortIfStatementsOnASingleLine: false
+  AllowShortLoopsOnASingleLine: false
+  AllowShortFunctionsOnASingleLine: Inline
+  PointerAlignment: Left
+  ReferenceAlignment: Left

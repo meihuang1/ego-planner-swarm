@@ -6,4 +6,7 @@ files/
 src/CMakeLists.txt
 benchmark_haha.zip
 rebound_planner_BB.zip
+log_files/
 
+src/co_navi_pkg/.git
+src/VINS-Fusion/.git

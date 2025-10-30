@@ -1,0 +1,23 @@
+<launch>
+  <!-- GNSS + IMU generator -->
+  <arg name="drone_id"/>
+  <arg name="origin_lat"/>
+  <arg name="origin_lon"/>
+  <arg name="origin_alt"/>
+  <arg name="init_x"/>
+  <arg name="init_y"/>
+  <arg name="init_z"/>
+
+  <include file="$(find co_navi_pkg)/launch/low_speed/IMU_GPS/ekf_fusion_IG.launch">
+    <arg name="drone_id"    value="$(arg drone_id)"/>
+    <arg name="init_x"      value="$(arg init_x)"/>
+    <arg name="init_y"      value="$(arg init_y)"/>
+    <arg name="init_z"      value="$(arg init_z)"/>
+
+    <arg name="origin_lat"  value="$(arg origin_lat)"/>
+    <arg name="origin_lon"  value="$(arg origin_lon)"/>
+    <arg name="origin_alt"  value="$(arg origin_alt)"/>
+    
+  </include>
+
+</launch>

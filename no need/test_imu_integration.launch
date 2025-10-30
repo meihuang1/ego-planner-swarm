@@ -1,0 +1,20 @@
+<launch>
+    <!-- IMU积分改进测试启动文件 -->
+    
+    <!-- 启动改进版IMU-LiDAR融合节点 -->
+    <include file="$(find co_navi_pkg)/launch/no need/fusion_IL_improved.launch">
+        <arg name="drone_id" value="0" />
+        <arg name="init_x" value="0.0" />
+        <arg name="init_y" value="0.0" />
+        <arg name="init_z" value="0.1" />
+    </include>
+    
+    <!-- 启动测试脚本 -->
+    <node pkg="co_navi_pkg" name="imu_integration_tester" type="test_imu_integration.py" output="screen">
+        <param name="test_duration" value="300.0" />  <!-- 5分钟测试 -->
+    </node>
+    
+    <!-- 启动RViz可视化 -->
+    <node pkg="rviz" name="rviz" type="rviz" args="-d $(find co_navi_pkg)/config/imu_test.rviz" />
+    
+</launch> 

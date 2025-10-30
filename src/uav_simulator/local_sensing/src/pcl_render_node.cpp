@@ -42,6 +42,7 @@ using namespace Eigen;
 
 int *depth_hostptr;
 cv::Mat depth_mat;
+cv::Mat depth_bgr_for_matching;
 
 //camera param
 int width, height;
@@ -52,6 +53,7 @@ ros::Publisher pub_depth;
 ros::Publisher pub_color;
 ros::Publisher pub_pose;
 ros::Publisher pub_pcl_wolrd;
+ros::Publisher pub_depth_matching;
 
 sensor_msgs::PointCloud2 local_map_pcl;
 sensor_msgs::PointCloud2 local_depth_pcl;
@@ -78,9 +80,11 @@ int _GLX_SIZE, _GLY_SIZE, _GLZ_SIZE;
 
 ros::Time last_odom_stamp = ros::TIME_MAX;
 Eigen::Vector3d last_pose_world;
+int num_points_for_matching = 30;
 
 void render_currentpose();
 void render_pcl_world();
+void createDepthMatchingImage();
 
 inline Eigen::Vector3d gridIndex2coord(const Eigen::Vector3i & index) 
 {
@@ -148,7 +152,7 @@ void pubCameraPose(const ros::TimerEvent & event)
   //cout<<"pub cam pose"
   geometry_msgs::PoseStamped camera_pose;
   camera_pose.header = _odom.header;
-  camera_pose.header.frame_id = "/map";
+  camera_pose.header.frame_id = "world";
   camera_pose.pose.position.x = cam2world(0,3);
   camera_pose.pose.position.y = cam2world(1,3);
   camera_pose.pose.position.z = cam2world(2,3);
@@ -167,6 +171,7 @@ void renderSensedPoints(const ros::TimerEvent & event)
   if( !has_odom ) return;
   render_currentpose();
   render_pcl_world();
+  createDepthMatchingImage();
 }
 
 vector<float> cloud_data;
@@ -262,7 +267,7 @@ void render_pcl_world()
   localMap.is_dense = true;
 
   pcl::toROSMsg(localMap, local_map_pcl);
-  local_map_pcl.header.frame_id  = "/map";
+  local_map_pcl.header.frame_id  = "world";
   local_map_pcl.header.stamp     = last_odom_stamp;
 
   pub_pcl_wolrd.publish(local_map_pcl);
@@ -318,6 +323,54 @@ void render_currentpose()
   //cv::imshow("depth_image", adjMap);
 }
 
+void createDepthMatchingImage()
+{
+  // Ensure we have an 8-bit grayscale to convert into BGR for colored drawings
+  cv::Mat depth_8bit;
+  double min = 0.5;
+  depth_mat.convertTo(depth_8bit, CV_8UC1, 255 / 13.0, -min);
+  cv::cvtColor(depth_8bit, depth_bgr_for_matching, cv::COLOR_GRAY2BGR);
+
+  // Randomized feature generation similar to pcl_render_node_360.cpp
+  std::vector<cv::Point2f> corners;
+  cv::RNG rng(12345);
+  int attempts = 0;
+  int max_attempts = num_points_for_matching * 3;
+  while (corners.size() < (size_t)num_points_for_matching && attempts < max_attempts) {
+    int x = rng.uniform(10, width - 10);
+    int y = rng.uniform(10, height - 10);
+    if (depth_mat.at<float>(y, x) > 0.1f) {
+      corners.push_back(cv::Point2f((float)x, (float)y));
+    }
+    attempts++;
+  }
+
+  for (size_t i = 0; i < corners.size(); i++) {
+    cv::Point2f corner = corners[i];
+    float jitter_x = rng.uniform(-8.0f, 8.0f);
+    float jitter_y = rng.uniform(-8.0f, 8.0f);
+    cv::Point2f jittered_corner = corner + cv::Point2f(jitter_x, jitter_y);
+    jittered_corner.x = std::max(0.0f, std::min((float)width - 1, jittered_corner.x));
+    jittered_corner.y = std::max(0.0f, std::min((float)height - 1, jittered_corner.y));
+
+    // draw
+    cv::circle(depth_bgr_for_matching, corner, 2, cv::Scalar(0, 255, 0), 2);
+    cv::circle(depth_bgr_for_matching, jittered_corner, 2, cv::Scalar(0, 0, 255), 2);
+    float distance = cv::norm(corner - jittered_corner);
+    if (distance < 12.0f) {
+      cv::line(depth_bgr_for_matching, corner, jittered_corner, cv::Scalar(0, 255, 255), 1);
+    }
+  }
+
+  // publish
+  cv_bridge::CvImage depth_matching_msg;
+  depth_matching_msg.header.stamp = last_odom_stamp;
+  depth_matching_msg.header.frame_id = "camera";
+  depth_matching_msg.encoding = sensor_msgs::image_encodings::BGR8;
+  depth_matching_msg.image = depth_bgr_for_matching;
+  pub_depth_matching.publish(depth_matching_msg.toImageMsg());
+}
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "pcl_render");
@@ -332,6 +385,7 @@ int main(int argc, char **argv)
   nh.getParam("sensing_horizon", sensing_horizon);
   nh.getParam("sensing_rate",    sensing_rate);
   nh.getParam("estimation_rate", estimation_rate);
+  nh.param("num_points", num_points_for_matching, 50);
 
   nh.getParam("map/x_size",     _x_size);
   nh.getParam("map/y_size",     _y_size);
@@ -361,6 +415,7 @@ int main(int argc, char **argv)
   pub_color = nh.advertise<sensor_msgs::Image>("colordepth",1000);
   pub_pose  = nh.advertise<geometry_msgs::PoseStamped>("camera_pose",1000);
   pub_pcl_wolrd = nh.advertise<sensor_msgs::PointCloud2>("rendered_pcl",1);
+  pub_depth_matching = nh.advertise<sensor_msgs::Image>("depth_matching",1000);
 
   double sensing_duration  = 1.0 / sensing_rate;
   double estimate_duration = 1.0 / estimation_rate;

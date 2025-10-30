@@ -30,3 +30,8 @@ add_executable (random_forest src/random_forest_sensing.cpp )
 target_link_libraries(random_forest
   ${catkin_LIBRARIES}
   ${PCL_LIBRARIES})
+
+add_executable (random_forest_path src/random_forest_sensing_path.cpp )
+target_link_libraries(random_forest_path
+  ${catkin_LIBRARIES}
+  ${PCL_LIBRARIES})

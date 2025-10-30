@@ -1,0 +1,18 @@
+<launch>
+
+    <arg name="drone_id"/>
+    <arg name="origin_lat"/>
+    <arg name="origin_lon"/>
+    <arg name="origin_alt"/>
+    <arg name="init_x"/>
+    <arg name="init_y"/>
+    <arg name="init_z"/>
+    
+    <include file="$(find co_navi_pkg)/launch/ekf_fusion_single.launch">
+        <arg name="namespace" value="drone_0" />
+    </include>
+
+    <!-- <include file="$(find co_navi_pkg)/launch/eskf_single.launch">
+        <arg name="namespace" value="drone_1" />
+    </include> -->
+</launch>

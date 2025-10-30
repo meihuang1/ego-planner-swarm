@@ -44,6 +44,11 @@ double _x_l, _x_h, _y_l, _y_h, _w_l, _w_h, _h_l, _h_h;
 double _z_limit, _sensing_range, _resolution, _sense_rate, _init_x, _init_y;
 double _min_dist;
 
+// 通道参数
+bool _enable_corridor;
+double _corridor_center_y;  // 通道中心的Y坐标
+double _corridor_width;     // 通道宽度
+
 bool _map_ok = false;
 bool _has_odom = false;
 
@@ -60,6 +65,12 @@ pcl::PointCloud<pcl::PointXYZ> cloudMap;
 
 sensor_msgs::PointCloud2 localMap_pcd;
 pcl::PointCloud<pcl::PointXYZ> clicked_cloud_;
+
+// 检查点是否在通道内
+bool isInCorridor(double x, double y) {
+  if (!_enable_corridor) return false;
+  return fabs(y - _corridor_center_y) < _corridor_width / 2.0;
+}
 
 void RandomMapGenerate() {
   pcl::PointXYZ pt_random;
@@ -105,6 +116,12 @@ void RandomMapGenerate() {
     x = rand_x(eng);
     y = rand_y(eng);
     z = rand_z_(eng);
+    
+    // 检查圆环是否在通道内，如果在通道内则跳过
+    if (isInCorridor(x, y)) {
+      i--;
+      continue;
+    }
 
     x = floor(x / _resolution) * _resolution + _resolution / 2.0;
     y = floor(y / _resolution) * _resolution + _resolution / 2.0;
@@ -178,6 +195,12 @@ void RandomMapGenerateCylinder() {
     w = rand_w(eng);
     inf = rand_inf(eng);
     
+    // 检查是否在通道内，如果在通道内则跳过
+    if (isInCorridor(x, y)) {
+      i--;
+      continue;
+    }
+    
     bool flag_continue = false;
     for ( auto p : obs_position )
       if ( (Eigen::Vector2d(x,y) - p).norm() < _min_dist /*metres*/ )
@@ -222,6 +245,12 @@ void RandomMapGenerateCylinder() {
     x = rand_x(eng);
     y = rand_y(eng);
     z = rand_z_(eng);
+    
+    // 检查圆环是否在通道内，如果在通道内则跳过
+    if (isInCorridor(x, y)) {
+      i--;
+      continue;
+    }
 
     x = floor(x / _resolution) * _resolution + _resolution / 2.0;
     y = floor(y / _resolution) * _resolution + _resolution / 2.0;
@@ -406,6 +435,11 @@ int main(int argc, char** argv) {
   n.param("sensing/rate", _sense_rate, 10.0);
 
   n.param("min_distance", _min_dist, 1.0);
+  
+  // 通道参数
+  n.param("corridor/enable", _enable_corridor, false);
+  n.param("corridor/center_y", _corridor_center_y, 0.0);
+  n.param("corridor/width", _corridor_width, 5.0);
 
   _x_l = -_x_size / 2.0;
   _x_h = +_x_size / 2.0;
@@ -415,6 +449,13 @@ int main(int argc, char** argv) {
 
   _obs_num = min(_obs_num, (int)_x_size * 10);
   _z_limit = _z_size;
+  
+  // 输出通道信息
+  if (_enable_corridor) {
+    ROS_WARN("Corridor enabled: center_y=%.2f, width=%.2f", _corridor_center_y, _corridor_width);
+  } else {
+    ROS_INFO("Corridor disabled - generating obstacles in full area");
+  }
 
   ros::Duration(0.5).sleep();
 

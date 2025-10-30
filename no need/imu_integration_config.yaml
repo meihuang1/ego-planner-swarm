@@ -1,0 +1,49 @@
+# 改进的IMU积分配置文件 - 针对Z轴稳定性优化
+imu_integration:
+  # 重力估计参数
+  gravity_estimation:
+    buffer_size: 100          # 重力估计缓冲区大小
+    estimation_time: 5.0      # 重力估计时间窗口(秒)
+    static_threshold: 0.01    # 静止状态角速度阈值(rad/s)
+    update_rate: 0.005        # 重力向量更新率（降低以提高稳定性）
+    min_samples: 20           # 最小样本数（提高重力估计质量）
+  
+  # 偏差估计参数
+  bias_estimation:
+    accel_update_rate: 0.0001 # 加速度计偏差更新率（大幅降低）
+    gyro_update_rate: 0.0001  # 陀螺仪偏差更新率（大幅降低）
+    static_threshold: 0.005   # 静止状态阈值(rad/s)（更严格）
+    max_accel_bias: 2.0       # 最大加速度计偏差(m/s²)
+    max_gyro_bias: 0.1        # 最大陀螺仪偏差(rad/s)
+  
+  # 卡尔曼滤波参数
+  kalman_filter:
+    position_noise: 0.01      # 位置过程噪声
+    velocity_noise: 0.1       # 速度过程噪声
+    attitude_noise: 0.001     # 姿态过程噪声
+    measurement_noise: 0.1    # 测量噪声
+  
+  # 积分方法参数
+  integration:
+    use_rk4: true             # 是否使用四阶龙格库塔方法
+    dt_max: 0.1               # 最大时间步长(秒)
+    min_dt: 0.001             # 最小时间步长(秒)
+  
+  # 漂移检测参数
+  drift_detection:
+    check_interval: 5.0       # 漂移检测间隔(秒)
+    max_drift_threshold: 10.0 # 最大允许漂移(米)
+    correction_strength: 0.1  # 漂移校正强度
+  
+  # Z轴稳定性参数（更严格的约束）
+  z_axis_stability:
+    max_z_acceleration: 10.0  # 最大Z轴加速度(m/s²) - 从20.0降到10.0
+    max_z_velocity: 5.0       # 最大Z轴速度(m/s) - 从10.0降到5.0
+    max_z_position_offset: 20.0 # 最大Z轴位置偏移(米) - 从50.0降到20.0
+    gravity_vector_min: 5.0   # 重力向量最小值(m/s²)
+    gravity_vector_max: 15.0  # 重力向量最大值(m/s²)
+    # 新增强制重置阈值
+    force_reset_position: 30.0 # 强制重置位置阈值(米)
+    force_reset_velocity: 8.0  # 强制重置速度阈值(m/s)
+    warning_position: 25.0     # 位置警告阈值(米)
+    warning_velocity: 8.0      # 速度警告阈值(m/s) 

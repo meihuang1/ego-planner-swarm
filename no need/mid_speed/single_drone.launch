@@ -1,0 +1,76 @@
+<launch>    
+    <!-- 定义参数，从配置文件读取 -->
+    <arg name="origin_lat" value="30.0"/>
+    <arg name="origin_lon" value="120.0"/>
+    <arg name="origin_alt" value="0.0"/>
+
+    <arg name="map_size_x"/>
+    <arg name="map_size_y"/>
+    <arg name="map_size_z"/>
+    <arg name="odom_topic" value="visual_slam/odom"/>
+
+    <arg name="drone_id"/>
+    <arg name="target_x"/>
+    <arg name="target_y"/>
+    <arg name="target_z"/>
+    <arg name="init_x"/>
+    <arg name="init_y"/>
+    <arg name="init_z"/>
+
+    <!-- drone x generator -->
+    <!-- planner run in sim --> 
+    <include file="$(find ego_planner)/launch/run_in_sim_high_speed.launch">
+        <arg name="drone_id"    value="$(arg drone_id)"/>
+        <arg name="init_x"      value="$(arg init_x)"/>
+        <arg name="init_y"      value="$(arg init_y)"/>
+        <arg name="init_z"      value="$(arg init_z)"/>
+        <arg name="target_x"    value="$(arg target_x)"/>
+        <arg name="target_y"    value="$(arg target_y)"/>
+        <arg name="target_z"    value="$(arg target_z)"/>
+
+        <arg name="map_size_x"  value="$(arg map_size_x)"/>
+        <arg name="map_size_y"  value="$(arg map_size_y)"/>
+        <arg name="map_size_z"  value="$(arg map_size_z)"/>
+        <arg name="odom_topic"  value="$(arg odom_topic)"/>
+    </include>
+
+    <!-- gps imu message generator -->
+    <!-- <include file="$(find co_navi_pkg)/launch/methods/odom_2_gps_imu.launch">
+        <arg name="drone_id"    value="$(arg drone_id)"/>
+        <arg name="init_x"      value="$(arg init_x)"/>
+        <arg name="init_y"      value="$(arg init_y)"/>
+        <arg name="init_z"      value="$(arg init_z)"/>
+    
+        <arg name="origin_lat"  value="$(arg origin_lat)"/>
+        <arg name="origin_lon"  value="$(arg origin_lon)"/>
+        <arg name="origin_alt"  value="$(arg origin_alt)"/>
+      </include> -->
+
+    <!-- FUSION NODE IMU GPS-->
+    <!-- <include file="$(find co_navi_pkg)/launch/methods/Fusions/fusion_IG.launch">
+      <arg name="drone_id"    value="$(arg drone_id)"/>
+      <arg name="init_x"      value="$(arg init_x)"/>
+      <arg name="init_y"      value="$(arg init_y)"/>
+      <arg name="init_z"      value="$(arg init_z)"/>
+      <arg name="origin_lat"  value="$(arg origin_lat)"/>
+      <arg name="origin_lon"  value="$(arg origin_lon)"/>
+      <arg name="origin_alt"  value="$(arg origin_alt)"/>
+    </include> -->
+
+    <!-- FUSION NODE IMU VISION-->
+    <!-- <include file="$(find co_navi_pkg)/launch/methods/Fusions/fusion_IV.launch">
+      <arg name="drone_id"    value="$(arg drone_id)"/>
+      <arg name="init_x"      value="$(arg init_x)"/>
+      <arg name="init_y"      value="$(arg init_y)"/>
+      <arg name="init_z"      value="$(arg init_z)"/>
+    </include> -->
+
+    <!-- FUSION NODE IMU VISION HIGH PRECISION-->
+    <!-- <include file="$(find co_navi_pkg)/launch/methods/Fusions/fusion_IG_hp.launch">
+      <arg name="drone_id"    value="$(arg drone_id)"/>
+      <arg name="init_x"      value="$(arg init_x)"/>
+      <arg name="init_y"      value="$(arg init_y)"/>
+      <arg name="init_z"      value="$(arg init_z)"/>
+    </include> -->
+
+</launch>

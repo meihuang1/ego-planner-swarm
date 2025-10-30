@@ -36,7 +36,7 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(PointXYZIRT,
 using namespace std;
 using namespace Eigen;
 
-ros::Publisher pub_cloud;
+ros::Publisher pub_cloud, pub_cloud_bigger;
 
 sensor_msgs::PointCloud2 local_map_pcl;
 sensor_msgs::PointCloud2 local_depth_pcl;
@@ -129,6 +129,7 @@ void renderSensedPoints(const ros::TimerEvent &event){
   Eigen::Matrix3d rot = q.toRotationMatrix();
   Eigen::Vector3d yaw_vec = rot.col(0);
 
+  // ------------------------- 小范围 local_map -------------------------
   pcl::PointCloud<PointXYZIRT> _local_map;  // ✅ 使用新的点云结构
 
   pcl::PointXYZ searchPoint(_odom.pose.pose.position.x,
@@ -149,9 +150,8 @@ void renderSensedPoints(const ros::TimerEvent &event){
       Vector3d pt_vec(base_pt.x - _odom.pose.pose.position.x,
                       base_pt.y - _odom.pose.pose.position.y,
                       base_pt.z - _odom.pose.pose.position.z);
-      if (pt_vec.normalized().dot(yaw_vec) < 0.5)
-        continue;
-
+      // if (pt_vec.normalized().dot(yaw_vec) < 0.5)
+      //   continue;
       
       PointXYZIRT pt;
       pt.x = base_pt.x;
@@ -176,6 +176,44 @@ void renderSensedPoints(const ros::TimerEvent &event){
   _local_map_pcd.header.frame_id = "map";
   _local_map_pcd.header.stamp = ros::Time::now();
   pub_cloud.publish(_local_map_pcd);
+
+  // ------------------------- 大范围 bigger_local_map -------------------------
+  pcl::PointCloud<PointXYZIRT> _bigger_local_map;
+
+  _pointIdxRadiusSearch.clear();
+  _pointRadiusSquaredDistance.clear();
+  
+  double bigger_sensing_horizon = 1.5 * sensing_horizon;
+  
+  if (_kdtreeLocalMap.radiusSearch(searchPoint, bigger_sensing_horizon,
+                                  _pointIdxRadiusSearch,
+                                  _pointRadiusSquaredDistance) > 0) {
+    for (size_t i = 0; i < _pointIdxRadiusSearch.size(); ++i) {
+      pcl::PointXYZ base_pt = _cloud_all_map.points[_pointIdxRadiusSearch[i]];
+
+      if ((fabs(base_pt.z - _odom.pose.pose.position.z) / (bigger_sensing_horizon)) > tan(M_PI / 6.0))
+        continue;
+
+      PointXYZIRT pt;
+      pt.x = base_pt.x;
+      pt.y = base_pt.y;
+      pt.z = base_pt.z;
+      pt.intensity = 0;
+      pt.ring = 0;
+      pt.time = static_cast<float>(i) * 0.0001f;
+
+      _bigger_local_map.points.push_back(pt);
+    }
+  }
+  _bigger_local_map.width = _bigger_local_map.points.size();
+  _bigger_local_map.height = 1;
+  _bigger_local_map.is_dense = true;
+
+  sensor_msgs::PointCloud2 _bigger_local_map_pcd;
+  pcl::toROSMsg(_bigger_local_map, _bigger_local_map_pcd);
+  _bigger_local_map_pcd.header.frame_id = "map";
+  _bigger_local_map_pcd.header.stamp = ros::Time::now();
+  pub_cloud_bigger.publish(_bigger_local_map_pcd);
 }
 
 void rcvLocalPointCloudCallBack(
@@ -203,6 +241,8 @@ int main(int argc, char** argv) {
   // publisher depth image and color image
   pub_cloud =
       nh.advertise<sensor_msgs::PointCloud2>("pcl_render_node/cloud", 10);
+  pub_cloud_bigger = 
+      nh.advertise<sensor_msgs::PointCloud2>("pcl_render_node/cloud_bigger", 10);
 
   double sensing_duration = 1.0 / sensing_rate * 2.5;
 

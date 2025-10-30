@@ -5,23 +5,30 @@ SET(CMAKE_BUILD_TYPE Release) # Release, RelWithDebInfo
 ADD_COMPILE_OPTIONS(-std=c++11 )
 ADD_COMPILE_OPTIONS(-std=c++14 )
 
+set(ENABLE_CUDA true)
 #set(ENABLE_CUDA false)
-set(ENABLE_CUDA false)
 
 if(ENABLE_CUDA)
   find_package(CUDA REQUIRED)
   SET(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3 -use_fast_math)
   set(CUDA_NVCC_FLAGS 
-#       -gencode arch=compute_20,code=sm_20;
-#       -gencode arch=compute_20,code=sm_21;
-#       -gencode arch=compute_30,code=sm_30;
-#       -gencode arch=compute_35,code=sm_35;
-#       -gencode arch=compute_50,code=sm_50;
-#       -gencode arch=compute_52,code=sm_52; 
-#       -gencode arch=compute_60,code=sm_60;
-#       -gencode arch=compute_61,code=sm_61;
-      -gencode arch=compute_75,code=sm_75;
-  ) 
+    -gencode arch=compute_61,code=sm_61
+    -gencode arch=compute_75,code=sm_75
+    -gencode arch=compute_86,code=sm_86
+    -O3 -use_fast_math
+)
+#   set(CUDA_NVCC_FLAGS 
+#       # -gencode arch=compute_20,code=sm_20;
+# #       -gencode arch=compute_20,code=sm_21;
+# #       -gencode arch=compute_30,code=sm_30;
+# #       -gencode arch=compute_35,code=sm_35;
+# #       -gencode arch=compute_50,code=sm_50;
+# #       -gencode arch=compute_52,code=sm_52; 
+# #       -gencode arch=compute_60,code=sm_60;
+# #       -gencode arch=compute_61,code=sm_61;
+#       # -gencode arch=compute_75,code=sm_75;
+#        -gencode arch=compute_86,code=sm_86;
+#   ) 
 
   SET(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
@@ -64,11 +71,23 @@ if(ENABLE_CUDA)
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
   )
+
+  add_executable(
+    pcl_render_node_360
+    src/pcl_render_node_360.cpp
+  )
+  target_link_libraries( pcl_render_node_360
+    depth_render_cuda
+    ${OpenCV_LIBS}
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+  )
 else(ENABLE_CUDA)
   find_package(Eigen3 REQUIRED)
   find_package(catkin REQUIRED COMPONENTS
       roscpp roslib cmake_modules pcl_ros sensor_msgs geometry_msgs nav_msgs quadrotor_msgs)
   
+  find_package(plan_env REQUIRED)
   catkin_package(
       DEPENDS Eigen
       CATKIN_DEPENDS roscpp roslib pcl_ros
@@ -78,6 +97,7 @@ else(ENABLE_CUDA)
     SYSTEM 
     ${catkin_INCLUDE_DIRS}
     ${Eigen_INCLUDE_DIRS}.
+    ${plan_env_INCLUDE_DIRS}
   )
 
   add_executable(
@@ -88,5 +108,17 @@ else(ENABLE_CUDA)
   target_link_libraries( pcl_render_node
     ${catkin_LIBRARIES}
     ${PCL_LIBRARIES}
+    plan_env
+  )
+
+  add_executable(
+    pcl_render_node_360
+    src/pointcloud_render_node_360.cpp
+  )
+
+  target_link_libraries( pcl_render_node_360
+    ${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+    plan_env
   )
 endif(ENABLE_CUDA)

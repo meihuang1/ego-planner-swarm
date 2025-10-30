@@ -1,0 +1,21 @@
+<launch>    
+    <arg name="map_size_x"/>
+    <arg name="map_size_y"/>
+    <arg name="map_size_z"/>
+
+    <!-- 定义参数，从配置文件读取 -->
+    <include file="$(find co_navi_pkg)/launch/mid_speed/single_drone.launch">
+        <arg name="drone_id"    value="0"/>
+        <arg name="init_x"      value="-140.0"/>
+        <arg name="init_y"      value="0.0"/>
+        <arg name="init_z"      value="5.0"/>
+        <arg name="target_x"    value="140.0"/>
+        <arg name="target_y"    value="0.0"/>
+        <arg name="target_z"    value="5.0"/>
+
+        <arg name="map_size_x"  value="$(arg map_size_x)"/>
+        <arg name="map_size_y"  value="$(arg map_size_y)"/>
+        <arg name="map_size_z"  value="$(arg map_size_z)"/>
+    </include>
+
+</launch>

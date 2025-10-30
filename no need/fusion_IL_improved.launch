@@ -1,0 +1,46 @@
+<launch>
+    <!-- 改进版IMU-LiDAR融合启动文件 -->
+    <arg name="drone_id" default="0" />
+    
+    <!-- ICP参数 - 针对漂移优化 -->
+    <arg name="icp_max_distance" default="2.0" />
+    <arg name="icp_max_iter" default="50" />
+    <arg name="voxel_leaf_size" default="0.3" />
+
+    <!-- 初始位置 -->
+    <arg name="init_x" default="-10.0" />
+    <arg name="init_y" default="0.0" />
+    <arg name="init_z" default="0.1" />
+
+    <!-- 启动改进版IMU生成器 -->
+    <node pkg="co_navi_pkg" name="improved_imu_generator" type="odom_to_gps_imu_improved.py" output="screen">
+        <param name="drone_id" value="$(arg drone_id)" />
+        
+        <!-- GPS原点参数 -->
+        <param name="origin_lat" value="30.0" />
+        <param name="origin_lon" value="120.0" />
+        <param name="origin_alt" value="0.0" />
+        
+        <!-- 初始位置偏移 -->
+        <param name="init_x" value="$(arg init_x)" />
+        <param name="init_y" value="$(arg init_y)" />
+        <param name="init_z" value="$(arg init_z)" />
+    </node>
+
+    <!-- 启动改进版IMU-LiDAR融合节点 -->
+    <node pkg="co_navi_pkg" name="IMU_Lidar_fusion" type="IMU_Lidar_fusion_ds" output="screen">
+        <!-- ICP参数 -->
+        <param name="icp_max_distance" value="$(arg icp_max_distance)" />
+        <param name="icp_max_iter" value="$(arg icp_max_iter)" />
+        <param name="voxel_leaf_size" value="$(arg voxel_leaf_size)" />
+
+        <!-- 初始位置参数 -->
+        <param name="init_x" value="$(arg init_x)" />
+        <param name="init_y" value="$(arg init_y)" />
+        <param name="init_z" value="$(arg init_z)" />
+        
+        <!-- 加载IMU积分配置 -->
+        <rosparam command="load" file="$(find co_navi_pkg)/config/imu_integration_config.yaml" />
+    </node>
+    
+</launch>
